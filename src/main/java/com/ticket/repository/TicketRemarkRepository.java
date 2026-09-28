@@ -6,6 +6,7 @@ import org.springframework.stereotype.Repository;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
@@ -29,6 +30,10 @@ public class TicketRemarkRepository {
                 .filter(r -> ticketId.equals(r.getTicketId()))
                 .sorted((r1, r2) -> r2.getCreatedAt().compareTo(r1.getCreatedAt()))
                 .collect(Collectors.toList());
+    }
+
+    public Optional<TicketRemark> findById(Long id) {
+        return Optional.ofNullable(remarks.get(id));
     }
 
     public void deleteByTicketId(Long ticketId) {

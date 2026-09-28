@@ -7,14 +7,18 @@ import com.ticket.dto.TicketRemarkDTO;
 import com.ticket.dto.TicketStats;
 import com.ticket.dto.UpdateTicketRequest;
 import com.ticket.exception.InvalidStatusTransitionException;
+import com.ticket.exception.MergeConflictException;
 import com.ticket.exception.TicketNotFoundException;
+import com.ticket.model.MergeStatus;
 import com.ticket.model.Ticket;
 import com.ticket.model.TicketPriority;
 import com.ticket.model.TicketRemark;
 import com.ticket.model.TicketStatus;
+import com.ticket.repository.TicketMergeRepository;
 import com.ticket.repository.TicketRemarkRepository;
 import com.ticket.repository.TicketRepository;
 import com.ticket.service.TicketService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -28,10 +32,18 @@ public class TicketServiceImpl implements TicketService {
 
     private final TicketRepository ticketRepository;
     private final TicketRemarkRepository ticketRemarkRepository;
+    private final TicketMergeRepository ticketMergeRepository;
 
     public TicketServiceImpl(TicketRepository ticketRepository, TicketRemarkRepository ticketRemarkRepository) {
+        this(ticketRepository, ticketRemarkRepository, null);
+    }
+
+    @Autowired
+    public TicketServiceImpl(TicketRepository ticketRepository, TicketRemarkRepository ticketRemarkRepository,
+                             TicketMergeRepository ticketMergeRepository) {
         this.ticketRepository = ticketRepository;
         this.ticketRemarkRepository = ticketRemarkRepository;
+        this.ticketMergeRepository = ticketMergeRepository;
     }
 
     @Override
@@ -102,6 +114,8 @@ public class TicketServiceImpl implements TicketService {
             throw new IllegalStateException("已删除的工单不能更新");
         }
 
+        assertNotFrozen(ticket);
+
         String oldTitle = ticket.getTitle();
         String oldDescription = ticket.getDescription();
         LocalDateTime oldDueAt = ticket.getDueAt();
@@ -146,6 +160,8 @@ public class TicketServiceImpl implements TicketService {
             throw new IllegalStateException("已删除的工单不能更新状态");
         }
 
+        assertNotFrozen(ticket);
+
         TicketStatus currentStatus = ticket.getStatus();
 
         if (!isValidStatusTransition(currentStatus, targetStatus)) {
@@ -167,6 +183,16 @@ public class TicketServiceImpl implements TicketService {
         Ticket ticket = ticketRepository.findById(id)
                 .orElseThrow(() -> new TicketNotFoundException(id));
 
+        assertNotFrozen(ticket);
+        if (ticketMergeRepository != null) {
+            ticketMergeRepository.findActiveByTicketId(id)
+                    .filter(merge -> merge.getStatus() == MergeStatus.MERGED)
+                    .ifPresent(merge -> {
+                        throw new MergeConflictException("工单 " + id + " 存在已生效的合并请求 "
+                                + merge.getId() + "，不能删除");
+                    });
+        }
+
         createSystemRecord(id, "工单已删除");
 
         ticketRepository.deleteById(id);
@@ -180,6 +206,8 @@ public class TicketServiceImpl implements TicketService {
         if (ticket.isDeleted()) {
             throw new IllegalStateException("已删除的工单不能添加备注");
         }
+
+        assertNotFrozen(ticket);
 
         TicketRemark remark = new TicketRemark();
         remark.setTicketId(ticketId);
@@ -215,6 +243,13 @@ public class TicketServiceImpl implements TicketService {
         return ticketRemarkRepository.findByTicketId(ticketId).stream()
                 .map(TicketRemarkDTO::new)
                 .collect(Collectors.toList());
+    }
+
+    private void assertNotFrozen(Ticket ticket) {
+        if (ticket.getMergedIntoId() != null) {
+            throw new MergeConflictException("工单 " + ticket.getId() + " 已合并到主工单 "
+                    + ticket.getMergedIntoId() + "，已冻结编辑");
+        }
     }
 
     private void createSystemRecord(Long ticketId, String content) {

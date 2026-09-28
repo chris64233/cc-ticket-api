@@ -3,6 +3,8 @@ package com.ticket.controller;
 import com.ticket.dto.ApiResponse;
 import com.ticket.dto.CreateTicketRemarkRequest;
 import com.ticket.dto.CreateTicketRequest;
+import com.ticket.dto.MergeBelongingDTO;
+import com.ticket.dto.MergeViewDTO;
 import com.ticket.dto.TicketDTO;
 import com.ticket.dto.TicketRemarkDTO;
 import com.ticket.dto.TicketStats;
@@ -10,6 +12,7 @@ import com.ticket.dto.UpdateStatusRequest;
 import com.ticket.dto.UpdateTicketRequest;
 import com.ticket.model.TicketPriority;
 import com.ticket.model.TicketStatus;
+import com.ticket.service.TicketMergeService;
 import com.ticket.service.TicketService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -26,9 +29,11 @@ public class TicketController {
     private static final List<String> ALLOWED_SORT_FIELDS = Arrays.asList("createdAt", "updatedAt");
 
     private final TicketService ticketService;
+    private final TicketMergeService ticketMergeService;
 
-    public TicketController(TicketService ticketService) {
+    public TicketController(TicketService ticketService, TicketMergeService ticketMergeService) {
         this.ticketService = ticketService;
+        this.ticketMergeService = ticketMergeService;
     }
 
     @PostMapping
@@ -110,5 +115,17 @@ public class TicketController {
     public ResponseEntity<ApiResponse<List<TicketRemarkDTO>>> getDeletedTicketHistory(@PathVariable Long id) {
         List<TicketRemarkDTO> history = ticketService.getDeletedTicketHistory(id);
         return ResponseEntity.ok(ApiResponse.success(history));
+    }
+
+    @GetMapping("/{id}/merge-view")
+    public ResponseEntity<ApiResponse<MergeViewDTO>> getMergeView(@PathVariable Long id) {
+        MergeViewDTO view = ticketMergeService.getMergeView(id);
+        return ResponseEntity.ok(ApiResponse.success(view));
+    }
+
+    @GetMapping("/{id}/merge-belonging")
+    public ResponseEntity<ApiResponse<MergeBelongingDTO>> getMergeBelonging(@PathVariable Long id) {
+        MergeBelongingDTO belonging = ticketMergeService.getMergeBelonging(id);
+        return ResponseEntity.ok(ApiResponse.success(belonging));
     }
 }

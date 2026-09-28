@@ -13,6 +13,8 @@ public class Ticket {
     private boolean deleted;
     private LocalDateTime deletedAt;
     private LocalDateTime dueAt;
+    /** 作为重复工单被合并到的主工单 ID；非空表示该工单已被冻结，禁止编辑 */
+    private Long mergedIntoId;
 
     public Ticket() {
     }
@@ -107,5 +109,13 @@ public class Ticket {
 
     public void setDueAt(LocalDateTime dueAt) {
         this.dueAt = dueAt;
+    }
+
+    public Long getMergedIntoId() {
+        return mergedIntoId;
+    }
+
+    public void setMergedIntoId(Long mergedIntoId) {
+        this.mergedIntoId = mergedIntoId;
     }
 }
