@@ -9,6 +9,7 @@ public class TicketRemark {
     private String operator;
     private LocalDateTime createdAt;
     private boolean isSystemRecord;
+    private Long linkedMasterTicketId;
 
     public TicketRemark() {
     }
@@ -69,5 +70,13 @@ public class TicketRemark {
 
     public void setSystemRecord(boolean systemRecord) {
         isSystemRecord = systemRecord;
+    }
+
+    public Long getLinkedMasterTicketId() {
+        return linkedMasterTicketId;
+    }
+
+    public void setLinkedMasterTicketId(Long linkedMasterTicketId) {
+        this.linkedMasterTicketId = linkedMasterTicketId;
     }
 }

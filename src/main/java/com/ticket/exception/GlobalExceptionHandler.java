@@ -26,6 +26,20 @@ public class GlobalExceptionHandler {
                 .body(ApiResponse.error(404, ex.getMessage()));
     }
 
+    @ExceptionHandler(MergeNotFoundException.class)
+    public ResponseEntity<ApiResponse<Void>> handleMergeNotFoundException(MergeNotFoundException ex) {
+        return ResponseEntity
+                .status(HttpStatus.NOT_FOUND)
+                .body(ApiResponse.error(404, ex.getMessage()));
+    }
+
+    @ExceptionHandler(MergeConflictException.class)
+    public ResponseEntity<ApiResponse<Void>> handleMergeConflictException(MergeConflictException ex) {
+        return ResponseEntity
+                .status(HttpStatus.CONFLICT)
+                .body(ApiResponse.error(409, ex.getMessage()));
+    }
+
     @ExceptionHandler(InvalidStatusTransitionException.class)
     public ResponseEntity<ApiResponse<Void>> handleInvalidStatusTransitionException(InvalidStatusTransitionException ex) {
         return ResponseEntity

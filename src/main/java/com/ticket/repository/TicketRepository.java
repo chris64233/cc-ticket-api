@@ -24,6 +24,22 @@ public class TicketRepository {
     public Ticket save(Ticket ticket) {
         if (ticket.getId() == null) {
             ticket.setId(idGenerator.getAndIncrement());
+            ticket.setVersion(0);
+        } else {
+            ticket.setVersion(ticket.getVersion() + 1);
+        }
+        tickets.put(ticket.getId(), ticket);
+        return ticket;
+    }
+
+    /**
+     * 直接持久化工单，不推进版本号。仅供合并/撤销等内部状态迁移使用，
+     * 普通业务写入必须走 {@link #save(Ticket)} 以便乐观锁检测到变化。
+     */
+    public Ticket persist(Ticket ticket) {
+        if (ticket.getId() == null) {
+            ticket.setId(idGenerator.getAndIncrement());
+            ticket.setVersion(0);
         }
         tickets.put(ticket.getId(), ticket);
         return ticket;

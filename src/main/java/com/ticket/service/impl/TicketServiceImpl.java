@@ -101,6 +101,7 @@ public class TicketServiceImpl implements TicketService {
         if (ticket.isDeleted()) {
             throw new IllegalStateException("已删除的工单不能更新");
         }
+        assertEditable(ticket);
 
         String oldTitle = ticket.getTitle();
         String oldDescription = ticket.getDescription();
@@ -145,6 +146,7 @@ public class TicketServiceImpl implements TicketService {
         if (ticket.isDeleted()) {
             throw new IllegalStateException("已删除的工单不能更新状态");
         }
+        assertEditable(ticket);
 
         TicketStatus currentStatus = ticket.getStatus();
 
@@ -166,6 +168,7 @@ public class TicketServiceImpl implements TicketService {
     public void deleteTicket(Long id) {
         Ticket ticket = ticketRepository.findById(id)
                 .orElseThrow(() -> new TicketNotFoundException(id));
+        assertEditable(ticket);
 
         createSystemRecord(id, "工单已删除");
 
@@ -180,6 +183,7 @@ public class TicketServiceImpl implements TicketService {
         if (ticket.isDeleted()) {
             throw new IllegalStateException("已删除的工单不能添加备注");
         }
+        assertEditable(ticket);
 
         TicketRemark remark = new TicketRemark();
         remark.setTicketId(ticketId);
@@ -217,8 +221,14 @@ public class TicketServiceImpl implements TicketService {
                 .collect(Collectors.toList());
     }
 
-    private void createSystemRecord(Long ticketId, String content) {
-        TicketRemark remark = new TicketRemark();
+    private void assertEditable(Ticket ticket) {
+        if (ticket.isFrozen()) {
+            throw new IllegalStateException(
+                    "工单 " + ticket.getId() + " 已作为重复工单被合并冻结，不能再进行编辑");
+        }
+    }
+
+    private void createSystemRecord(Long ticketId, String content) {        TicketRemark remark = new TicketRemark();
         remark.setTicketId(ticketId);
         remark.setContent(content);
         remark.setOperator("SYSTEM");

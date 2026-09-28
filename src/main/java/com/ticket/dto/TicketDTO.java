@@ -18,6 +18,9 @@ public class TicketDTO {
     private LocalDateTime deletedAt;
     private LocalDateTime dueAt;
     private boolean overdue;
+    private long version;
+    private boolean frozen;
+    private Long masterTicketId;
 
     public TicketDTO() {
     }
@@ -34,6 +37,9 @@ public class TicketDTO {
         this.deletedAt = ticket.getDeletedAt();
         this.dueAt = ticket.getDueAt();
         this.overdue = calculateOverdue(ticket);
+        this.version = ticket.getVersion();
+        this.frozen = ticket.isFrozen();
+        this.masterTicketId = ticket.getMasterTicketId();
     }
 
     private boolean calculateOverdue(Ticket ticket) {
@@ -127,5 +133,29 @@ public class TicketDTO {
 
     public void setOverdue(boolean overdue) {
         this.overdue = overdue;
+    }
+
+    public long getVersion() {
+        return version;
+    }
+
+    public void setVersion(long version) {
+        this.version = version;
+    }
+
+    public boolean isFrozen() {
+        return frozen;
+    }
+
+    public void setFrozen(boolean frozen) {
+        this.frozen = frozen;
+    }
+
+    public Long getMasterTicketId() {
+        return masterTicketId;
+    }
+
+    public void setMasterTicketId(Long masterTicketId) {
+        this.masterTicketId = masterTicketId;
     }
 }

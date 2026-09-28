@@ -31,8 +31,19 @@ public class TicketRemarkRepository {
                 .collect(Collectors.toList());
     }
 
+    public List<TicketRemark> findByLinkedMasterTicketId(Long masterTicketId) {
+        return remarks.values().stream()
+                .filter(r -> masterTicketId.equals(r.getLinkedMasterTicketId()))
+                .sorted((r1, r2) -> r2.getCreatedAt().compareTo(r1.getCreatedAt()))
+                .collect(Collectors.toList());
+    }
+
     public void deleteByTicketId(Long ticketId) {
         remarks.entrySet().removeIf(entry -> ticketId.equals(entry.getValue().getTicketId()));
+    }
+
+    public void deleteById(Long id) {
+        remarks.remove(id);
     }
 
     public void clear() {

@@ -11,6 +11,7 @@ public class TicketRemarkDTO {
     private String operator;
     private LocalDateTime createdAt;
     private boolean isSystemRecord;
+    private Long linkedMasterTicketId;
 
     public TicketRemarkDTO(TicketRemark remark) {
         this.id = remark.getId();
@@ -19,6 +20,7 @@ public class TicketRemarkDTO {
         this.operator = remark.getOperator();
         this.createdAt = remark.getCreatedAt();
         this.isSystemRecord = remark.isSystemRecord();
+        this.linkedMasterTicketId = remark.getLinkedMasterTicketId();
     }
 
     public Long getId() {
@@ -43,5 +45,9 @@ public class TicketRemarkDTO {
 
     public boolean isSystemRecord() {
         return isSystemRecord;
+    }
+
+    public Long getLinkedMasterTicketId() {
+        return linkedMasterTicketId;
     }
 }

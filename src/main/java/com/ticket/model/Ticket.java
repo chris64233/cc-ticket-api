@@ -13,6 +13,9 @@ public class Ticket {
     private boolean deleted;
     private LocalDateTime deletedAt;
     private LocalDateTime dueAt;
+    private long version;
+    private boolean frozen;
+    private Long masterTicketId;
 
     public Ticket() {
     }
@@ -27,6 +30,8 @@ public class Ticket {
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
         this.deleted = false;
+        this.version = 0;
+        this.frozen = false;
     }
 
     public Long getId() {
@@ -107,5 +112,29 @@ public class Ticket {
 
     public void setDueAt(LocalDateTime dueAt) {
         this.dueAt = dueAt;
+    }
+
+    public long getVersion() {
+        return version;
+    }
+
+    public void setVersion(long version) {
+        this.version = version;
+    }
+
+    public boolean isFrozen() {
+        return frozen;
+    }
+
+    public void setFrozen(boolean frozen) {
+        this.frozen = frozen;
+    }
+
+    public Long getMasterTicketId() {
+        return masterTicketId;
+    }
+
+    public void setMasterTicketId(Long masterTicketId) {
+        this.masterTicketId = masterTicketId;
     }
 }
